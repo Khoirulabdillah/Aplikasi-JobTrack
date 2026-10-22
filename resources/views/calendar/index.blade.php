@@ -26,7 +26,7 @@
         <div class="card-surface rounded-2xl p-5">
             <h2 class="mb-4 text-lg font-semibold text-slate-900">Follow-up Sudah Lewat</h2>
             @forelse ($overdue as $application)
-                <div class="mb-3 rounded-xl border border-red-200 bg-red-50 p-3">
+                <div class="calendar-overdue mb-3 rounded-xl border border-red-200 bg-red-50 p-3">
                     <div class="flex items-center justify-between">
                         <p class="font-semibold text-slate-800">{{ $application->company_name }}</p>
                         <span class="status-badge status-{{ Str::lower($application->status) }}">{{ $application->status }}</span>

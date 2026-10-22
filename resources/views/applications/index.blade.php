@@ -57,7 +57,48 @@
     </div>
 
     <div class="card-surface overflow-hidden rounded-2xl">
-        <div class="overflow-x-auto">
+        <div class="divide-y divide-slate-200 lg:hidden">
+            @forelse ($applications as $application)
+                <article class="space-y-4 p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <h2 class="break-words font-semibold text-slate-900">{{ $application->company_name }}</h2>
+                            <p class="mt-1 break-words text-sm text-slate-600">{{ $application->job_position }}</p>
+                        </div>
+                        <span class="status-badge status-{{ Str::lower($application->status) }} shrink-0">{{ $application->status }}</span>
+                    </div>
+
+                    <dl class="grid grid-cols-2 gap-x-3 gap-y-4 text-sm">
+                        <div class="min-w-0">
+                            <dt class="text-xs font-medium text-slate-500">Tanggal Melamar</dt>
+                            <dd class="mt-1 break-words text-slate-700">{{ \Carbon\Carbon::parse($application->application_date)->translatedFormat('d M Y') }}</dd>
+                        </div>
+                        <div class="min-w-0">
+                            <dt class="text-xs font-medium text-slate-500">Sumber</dt>
+                            <dd class="mt-1 break-words text-slate-700">{{ $application->source }}</dd>
+                        </div>
+                        <div class="min-w-0">
+                            <dt class="text-xs font-medium text-slate-500">Follow-up</dt>
+                            <dd class="mt-1 break-words text-slate-700">{{ $application->follow_up_date ? \Carbon\Carbon::parse($application->follow_up_date)->translatedFormat('d M Y') : '-' }}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('applications.show', $application) }}" class="flex-1 rounded-lg bg-indigo-100 px-3 py-2 text-center text-xs font-semibold text-blue-700">Detail</a>
+                        <a href="{{ route('applications.edit', $application) }}" class="flex-1 rounded-lg bg-slate-200 px-3 py-2 text-center text-xs font-semibold text-blue-700">Edit</a>
+                        <form action="{{ route('applications.destroy', $application) }}" method="POST" onsubmit="return confirm('Hapus lamaran ini?')" class="flex-1">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="w-full rounded-lg bg-red-100 px-3 py-2 text-xs font-semibold text-red-700">Hapus</button>
+                        </form>
+                    </div>
+                </article>
+            @empty
+                <p class="px-4 py-10 text-center text-sm text-slate-500">Belum ada lamaran. Mulai dengan menambahkan lamaran baru.</p>
+            @endforelse
+        </div>
+
+        <div class="hidden overflow-x-auto lg:block">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-50">
                     <tr>
@@ -81,8 +122,8 @@
                             <td class="px-4 py-3 text-slate-600">{{ $application->follow_up_date ? \Carbon\Carbon::parse($application->follow_up_date)->translatedFormat('d M Y') : '-' }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex gap-2">
-                                    <a href="{{ route('applications.show', $application) }}" class="rounded-lg bg-indigo-100 px-2 py-1 text-xs font-semibold text-indigo-700">Detail</a>
-                                    <a href="{{ route('applications.edit', $application) }}" class="rounded-lg bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">Edit</a>
+                                    <a href="{{ route('applications.show', $application) }}" class="rounded-lg bg-indigo-100 px-2 py-1 text-xs font-semibold text-blue-700">Detail</a>
+                                    <a href="{{ route('applications.edit', $application) }}" class="rounded-lg bg-slate-200 px-2 py-1 text-xs font-semibold text-blue-700">Edit</a>
                                     <form action="{{ route('applications.destroy', $application) }}" method="POST" onsubmit="return confirm('Hapus lamaran ini?')">
                                         @csrf
                                         @method('DELETE')

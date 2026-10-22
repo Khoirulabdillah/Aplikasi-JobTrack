@@ -124,8 +124,10 @@
 <script>
     const statusCtx = document.getElementById('statusChart');
     const monthlyCtx = document.getElementById('monthlyChart');
+    const isDarkMode = () => document.documentElement.classList.contains('dark');
+    const chartTextColor = () => isDarkMode() ? '#f8fafc' : '#666666';
 
-    new Chart(statusCtx, {
+    const statusChart = new Chart(statusCtx, {
         type: 'doughnut',
         data: {
             labels: @json($statusChartLabels),
@@ -138,11 +140,16 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: chartTextColor() },
+                },
+            }
         }
     });
 
-    new Chart(monthlyCtx, {
+    const monthlyChart = new Chart(monthlyCtx, {
         type: 'bar',
         data: {
             labels: @json($monthlyLabels),
@@ -157,8 +164,36 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            scales: {
+                x: {
+                    ticks: { color: chartTextColor() },
+                    grid: {
+                        color: () => isDarkMode()
+                            ? 'rgba(255, 255, 255, 0.18)'
+                            : '#e0e0e0',
+                    },
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0, color: chartTextColor() },
+                    grid: {
+                        color: () => isDarkMode()
+                            ? 'rgba(255, 255, 255, 0.18)'
+                            : '#e0e0e0',
+                    },
+                },
+            }
         }
     });
+
+    new MutationObserver(() => {
+        const textColor = chartTextColor();
+        statusChart.options.plugins.legend.labels.color = textColor;
+        monthlyChart.options.scales.x.ticks.color = textColor;
+        monthlyChart.options.scales.y.ticks.color = textColor;
+        statusChart.update();
+        monthlyChart.update();
+    })
+        .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 </script>
 @endsection

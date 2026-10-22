@@ -12,12 +12,20 @@ class DashboardController extends Controller
     {
         $statuses = ['Dikirim', 'Ditinjau', 'Diterima', 'Ditolak'];
 
-        $stats = [];
-        foreach ($statuses as $status) {
-            $stats[$status] = JobApplication::where('status', $status)->count();
+        $statusCounts = JobApplication::query()
+            ->select('status')
+            ->selectRaw('COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $stats = array_fill_keys($statuses, 0);
+        foreach ($statusCounts as $status => $count) {
+            if (array_key_exists($status, $stats)) {
+                $stats[$status] = (int) $count;
+            }
         }
 
-        $stats['total'] = JobApplication::count();
+        $stats['total'] = (int) $statusCounts->sum();
 
         $statusChartLabels = $statuses;
         $statusChartData = array_map(fn (string $status) => (int) ($stats[$status] ?? 0), $statuses);

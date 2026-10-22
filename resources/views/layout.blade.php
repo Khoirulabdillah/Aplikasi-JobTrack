@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'JobTrack')</title>
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem('jobtrack-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', savedTheme ? savedTheme === 'dark' : prefersDark);
+        })();
+    </script>
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
@@ -26,55 +33,35 @@
                 </div>
             </div>
 
-            <nav class="flex-1 space-y-2 p-4">
-                <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }} flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                    <span class="flex h-5 w-5 items-center justify-center">
-                        <img src="{{ asset('icon/dashboard.png') }}" alt="Dashboard" class="h-5 w-5 object-contain" />
-                    </span>
-                    Dashboard
-                </a>
-                <a href="{{ route('applications.index') }}" class="sidebar-link {{ request()->routeIs('applications.*') ? 'active' : '' }} flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                    <span class="flex h-5 w-5 items-center justify-center">
-                        <img src="{{ asset('icon/semua%20lamaran.png') }}" alt="Semua Lamaran" class="h-5 w-5 object-contain" />
-                    </span>
-                    Semua Lamaran
-                </a>
-                <a href="{{ route('applications.create') }}" class="sidebar-link {{ request()->routeIs('applications.create') ? 'active' : '' }} flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                    <span class="flex h-5 w-5 items-center justify-center">
-                        <img src="{{ asset('icon/tambah%20lamaran.png') }}" alt="Tambah Lamaran" class="h-5 w-5 object-contain" />
-                    </span>
-                    Tambah Lamaran
-                </a>
-                <a href="{{ route('calendar') }}" class="sidebar-link {{ request()->routeIs('calendar') ? 'active' : '' }} flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                    <span class="flex h-5 w-5 items-center justify-center">
-                        <img src="{{ asset('icon/kalender.png') }}" alt="Kalender" class="h-5 w-5 object-contain" />
-                    </span>
-                    Kalender dan Follow-up
-                </a>
-                <a href="{{ route('settings') }}" class="sidebar-link {{ request()->routeIs('settings') ? 'active' : '' }} flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                    <span class="flex h-5 w-5 items-center justify-center">
-                        <img src="{{ asset('icon/settings.png') }}" alt="Pengaturan" class="h-5 w-5 object-contain" />
-                    </span>
-                    Pengaturan Aplikasi
-                </a>
+            <nav aria-label="Menu utama" class="flex-1 space-y-2 p-4">
+                @include('partials.navigation')
             </nav>
         </aside>
 
         <div class="flex-1">
             <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
-                <div class="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                    <div>
-                        <h1 class="text-xl font-bold text-slate-900">@yield('page_title', 'Dashboard')</h1>
+                <div class="relative px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+                    <div class="flex items-center justify-between gap-3">
+                        <h1 class="min-w-0 truncate text-xl font-bold text-slate-900">@yield('page_title', 'Dashboard')</h1>
+                        <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+                            <button id="themeToggle" type="button" aria-label="Toggle dark mode" aria-pressed="false" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-100 sm:px-3">
+                                <span id="themeToggleIcon" aria-hidden="true">🌙</span>
+                                <span id="themeToggleLabel" class="hidden sm:inline">Dark</span>
+                            </button>
+                            <a href="{{ route('applications.create') }}" class="hidden items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 sm:inline-flex">
+                                + Tambah Lamaran
+                            </a>
+                            <button id="mobileMenuToggle" type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="mobileNavigation" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 lg:hidden">
+                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <button id="themeToggle" type="button" aria-label="Toggle dark mode" aria-pressed="false" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-100">
-                            <span id="themeToggleIcon" aria-hidden="true">🌙</span>
-                            <span id="themeToggleLabel">Dark</span>
-                        </button>
-                        <a href="{{ route('applications.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500">
-                            + Tambah Lamaran
-                        </a>
-                    </div>
+
+                    <nav id="mobileNavigation" aria-label="Menu utama" class="hidden space-y-2 border-t border-slate-200 pt-3 lg:hidden">
+                        @include('partials.navigation')
+                    </nav>
                 </div>
             </header>
 
@@ -105,6 +92,9 @@
         const themeToggle = document.getElementById('themeToggle');
         const themeToggleIcon = document.getElementById('themeToggleIcon');
         const themeToggleLabel = document.getElementById('themeToggleLabel');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileNavigation = document.getElementById('mobileNavigation');
+        let themeTransitionTimeout;
 
         const syncTheme = () => {
             const isDark = root.classList.contains('dark');
@@ -113,17 +103,66 @@
             themeToggle?.setAttribute('aria-pressed', String(isDark));
         };
 
-        const savedTheme = localStorage.getItem('jobtrack-theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        root.classList.toggle('dark', savedTheme ? savedTheme === 'dark' : prefersDark);
-
         syncTheme();
 
         themeToggle?.addEventListener('click', () => {
+            document.body.classList.add('theme-transition');
             const isDark = root.classList.toggle('dark');
             localStorage.setItem('jobtrack-theme', isDark ? 'dark' : 'light');
             syncTheme();
+
+            window.clearTimeout(themeTransitionTimeout);
+            themeTransitionTimeout = window.setTimeout(() => {
+                document.body.classList.remove('theme-transition');
+            }, 350);
         });
+
+        const closeMobileNavigation = () => {
+            mobileNavigation?.classList.add('hidden');
+            mobileMenuToggle?.setAttribute('aria-expanded', 'false');
+            mobileMenuToggle?.setAttribute('aria-label', 'Buka menu navigasi');
+        };
+
+        mobileMenuToggle?.addEventListener('click', () => {
+            const isExpanded = mobileMenuToggle.getAttribute('aria-expanded') === 'true';
+            mobileNavigation?.classList.toggle('hidden', isExpanded);
+            mobileMenuToggle.setAttribute('aria-expanded', String(!isExpanded));
+            mobileMenuToggle.setAttribute('aria-label', isExpanded ? 'Buka menu navigasi' : 'Tutup menu navigasi');
+        });
+
+        mobileNavigation?.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', closeMobileNavigation);
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeMobileNavigation();
+            }
+        });
+
+        const prefetchedNavigationUrls = new Set();
+        const prefetchNavigationPage = (event) => {
+            const link = event.target.closest('nav a[href]');
+
+            if (
+                !link ||
+                link.origin !== window.location.origin ||
+                link.href === window.location.href ||
+                prefetchedNavigationUrls.has(link.href) ||
+                navigator.connection?.saveData
+            ) {
+                return;
+            }
+
+            const prefetch = document.createElement('link');
+            prefetch.rel = 'prefetch';
+            prefetch.href = link.href;
+            document.head.append(prefetch);
+            prefetchedNavigationUrls.add(link.href);
+        };
+
+        document.addEventListener('pointerover', prefetchNavigationPage);
+        document.addEventListener('focusin', prefetchNavigationPage);
     </script>
 </body>
 </html>

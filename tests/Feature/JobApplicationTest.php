@@ -53,6 +53,61 @@ class JobApplicationTest extends TestCase
         $response->assertSee('PT Digital Nusantara');
     }
 
+    public function test_application_list_has_mobile_cards_and_desktop_table(): void
+    {
+        $response = $this->get(route('applications.index'));
+
+        $response->assertOk()
+            ->assertSee('lg:hidden', false)
+            ->assertSee('hidden overflow-x-auto lg:block', false);
+    }
+
+    public function test_application_navigation_highlights_only_the_current_section(): void
+    {
+        $indexResponse = $this->get(route('applications.index'));
+        $createResponse = $this->get(route('applications.create'));
+
+        $this->assertSame(2, substr_count($indexResponse->getContent(), 'sidebar-link active'));
+        $this->assertSame(2, substr_count($createResponse->getContent(), 'sidebar-link active'));
+    }
+
+    public function test_dashboard_displays_aggregated_application_counts(): void
+    {
+        foreach (['Dikirim', 'Ditinjau'] as $status) {
+            $this->post(route('applications.store'), [
+                'company_name' => 'PT '.$status,
+                'job_position' => 'Developer',
+                'employment_type' => 'Full-time',
+                'work_arrangement' => 'Remote',
+                'application_date' => '2026-10-10',
+                'source' => 'LinkedIn',
+                'status' => $status,
+            ]);
+        }
+
+        $response = $this->get(route('dashboard'));
+
+        $response->assertOk()
+            ->assertViewHas('stats', fn (array $stats) => $stats === [
+                'Dikirim' => 1,
+                'Ditinjau' => 1,
+                'Diterima' => 0,
+                'Ditolak' => 0,
+                'total' => 2,
+            ]);
+    }
+
+    public function test_saved_theme_is_initialized_before_the_page_body_renders(): void
+    {
+        $response = $this->get(route('applications.index'));
+        $content = $response->getContent();
+
+        $this->assertLessThan(
+            strpos($content, '<body'),
+            strpos($content, "localStorage.getItem('jobtrack-theme')")
+        );
+    }
+
     public function test_can_update_status_and_store_history(): void
     {
         $this->post('/applications', [
